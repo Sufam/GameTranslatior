@@ -18,26 +18,24 @@ temp = {}#快取
 
 #區隔出變數
 def tokenize_with_nested_braces(text):
-    tokens = []
-    stack = []
-    start_idx = 0
-    
-    for i, char in enumerate(text):
-        if char == '{':
-            if len(stack) == 0:
-                if i > start_idx:
-                    tokens.append({"type": "text", "content": text[start_idx:i]})
-                start_idx = i
-            stack.append(char)
-        elif char == '}':
-            if stack:
-                stack.pop()
-                if len(stack) == 0:
-                    tokens.append({"type": "brace", "content": text[start_idx : i + 1]})
-                    start_idx = i + 1
-                    
-    if start_idx < len(text):
-        tokens.append({"type": "text", "content": text[start_idx:]})
+    tokens = [{"content": "", "type": "text"}]
+    brances = 0
+    inbrance = False
+
+    for i in text:
+        if i != "{":
+            tokens[-1]["content"] = tokens[-1]["content"] + i
+        if i == "{":
+            brances += 1
+            if inbrance != True:
+                tokens.append({"content": "{", "type": "variable"})
+            else:
+                tokens[-1]["content"] = tokens[-1]["content"] + i
+            inbrance = True
+        elif i == "}":
+            brances -= 1
+            if brances <= 0:
+                inbrance = False
         
     return tokens
 
