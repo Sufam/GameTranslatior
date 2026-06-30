@@ -1,7 +1,7 @@
-from deep_translator import GoogleTranslator
-from tqdm import tqdm
-import locale, json, io
+import locale, json, io, subprocess, sys
 import translator, json_process, txt_process
+from tqdm import tqdm
+from deep_translator import GoogleTranslator
 
 targetLang = input("Please enter your target language:")
 
