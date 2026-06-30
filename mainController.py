@@ -1,7 +1,7 @@
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
 import locale, json, io
-import json_process, translator
+import translator, json_process, txt_process
 
 targetLang = input("Please enter your target language:")
 
@@ -48,3 +48,6 @@ if filetype == "json":
     
         saveData = json.dumps(output, indent = 4, ensure_ascii = False)
         file.write(saveData)
+
+elif filetype == "txt" or filetype == "lang":
+    txt_process.translatetxt(rawFile, saveFile, targetLang)
