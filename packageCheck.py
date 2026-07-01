@@ -8,7 +8,7 @@ def checkPackage(package):
     else:
         print(f"{package} installed")
 
-packagefile = "./requirements.txt"
+packagefile = input("Enter requirements file storage location")
 
 with open(packagefile, "r", encoding="utf-8") as package:
     requitrement = package.readlines()
