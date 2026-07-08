@@ -1,24 +1,32 @@
-import locale, json, io
-#import game_translator.translator as translator, game_translator.json_process as json_process, game_translator.lang_process as lang_process, game_translator.xml_process as xml_process
+import locale, json, io, os
 from tqdm import tqdm
 from deep_translator import GoogleTranslator
+from pathlib import Path
 
-from game_translator import json_process, lang_process, translator, xml_process
+import json_process, lang_process, translator, xml_process
 
 def main():
     targetLang = input("Please enter your target language:")
-
+    langs_dict = GoogleTranslator().get_supported_languages(as_dict=True)
     if targetLang == "":
-        langs_dict = GoogleTranslator().get_supported_languages(as_dict=True)
         localeLang = locale.getlocale()[0]
         targetLang = langs_dict[localeLang.split("_")[0].lower()]
         print(f"The system default language will be used:{targetLang}\n")
+    elif targetLang not in langs_dict.values():
+        print("Not suppout lang\nSupport lang:")
+        for i in langs_dict:
+            print(langs_dict[i], end = ", ")
+        return "Lang input error"
 
     filetype = input("Enter the file type:").lower()
     print()
     rawFile = input("Enter the file you want to translate:")
     print()
-    saveFile = input("Enter the file storage location:")
+    saveFile = os.path.join(os.path.dirname(rawFile), f"{input("Enter output file name:")}.{filetype}")
+    if os.path.isfile(saveFile):
+        print("有同名的文件將被取代，是否繼續執行(y/n)")
+        if input().lower() == "n":
+            return "File name error"
     print("\nTranslating, please wait...")
 
     if filetype == "json":
@@ -54,6 +62,8 @@ def main():
 
     elif filetype == "lang" or filetype == "txt":
         lang_process.translatetxt(rawFile, saveFile, targetLang)
+    else:
+        print("Not Support")
 
 if __name__ == '__main__':
     main()

@@ -8,7 +8,10 @@ version = "0.0.1"
 description = "This program is use to translate the game file."
 readme = "README.md"
 requires-python = ">=3.8"
-dependencies = [deep_translator>=1.11.4, tqdm>=4.68.3]
+dependencies = ["deep_translator>=1.11.4", "tqdm>=4.68.3"]
 
 [project.scripts]
 run-game_translator = "game_translator.main:main" 
+
+[tool.hatch.build.targets.wheel]
+packages = ["game_translator"]

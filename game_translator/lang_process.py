@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import time
-from game_translator import translator
+import translator
 
 def translatetxt(translateFile, outputfile, targetLang):
     translatedText = []
