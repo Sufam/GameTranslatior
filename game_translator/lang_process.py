@@ -1,16 +1,16 @@
-from tqdm import tqdm
 import time
 import translator
 
 def translatetxt(translateFile, outputfile, targetLang):
     translatedText = []
+    print(outputfile)
 
     with open(translateFile, 'r', encoding='utf-8') as f_in, \
         open(outputfile, 'w', encoding='utf-8') as f_out:
         
         lines = f_in.readlines()
         
-        for i, line in enumerate(tqdm(lines, desc="Translation progress")):
+        for i, line in enumerate(lines):
 
             text = line.strip()
 
