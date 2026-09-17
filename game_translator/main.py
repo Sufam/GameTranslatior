@@ -1,20 +1,20 @@
 import json, io, os, tkinter, threading
 from tkinter import filedialog, ttk
-from deep_translator import GoogleTranslator
+from deep_translator.mymemory import MY_MEMORY_LANGUAGES_TO_CODES
 from functools import partial
 from pathlib import Path
 
 
 import json_process, lang_process, translator, xml_process
 
-
+#Load file
 def loadFile(file):
     global filePreview
     with open(file, "r", encoding = "utf-8") as f:
         lines = f.readlines() 
     filePreview.set(lines)
     
-
+#Choose translate file
 def chooseFile():
     global inputPath, fileName, file_Information
     filePath = filedialog.askopenfilename()
@@ -25,24 +25,30 @@ def chooseFile():
     loadFile(filePath)
     file_Information.pack(fill = "both", padx = 10, pady = 10)
 
-
-def checkInput(path, name, lang, filetype):
-    if path.get() == "" or name.get() == "" or lang.get() == "" or filetype.get() == "":
+#Check input not blank
+def checkInput(path, name, sourcelang, targetlang, filetype):
+    if path == "" or name == "" or sourcelang == "Source Language" or targetlang == "Target Language" or filetype == "File Type":
         return False
     return True
-        
-def start():
-    global inputPath, outputName, langOption, langs_dict, fileOption, progress
 
-    if not checkInput(inputPath, outputName, langOption, fileOption):
+#Start translate
+def start():
+    global inputPath, outputNameEnter, sourceLangOption, targetLangOption, fileTypeOption, progress, run_prompt_text
+
+    sourceLang = sourceLangOption.get()
+    targetLang = targetLangOption.get()
+    fileType = fileTypeOption.get()
+    rawFile = inputPath.get()
+    outputName = outputNameEnter.get()
+
+    if not checkInput(rawFile, outputName, sourceLang, targetLang, fileTypeOption):
+        run_prompt_text.set("Input error, please check again.")
         return "input error"
 
-    targetLang = langs_dict[langOption.get()]
-    fileType = fileOption.get()
-    rawFile = inputPath.get()
-    saveFile = os.path.join(f"{os.path.abspath(os.path.split(rawFile)[0])}", f"{outputName.get()}.{fileType}")
+    saveFile = os.path.join(f"{os.path.abspath(os.path.split(rawFile)[0])}", f"{outputName}.{fileType}")
 
-    print(targetLang, fileType, rawFile, saveFile)
+    run_prompt_text.set("Start Translate")
+    print(f"Start Translate\n Raw File:{rawFile}\n Save File:{saveFile}\n Source Lang:{sourceLang}\n Target Lnag:{targetLang}")
 
     if fileType == "json":
         file = open(rawFile, "r")
@@ -61,7 +67,7 @@ def start():
 
             for j in temp:
                 if type(temp[j]) == str:
-                    translated[j] = translator.translateText(temp[j], targetLang)
+                    translated[j] = translator.translateText(temp[j], sourceLang, targetLang)
                 else:
                     translated[j] = temp[j]
             
@@ -76,11 +82,15 @@ def start():
             file.write(saveData)
 
     elif fileType == "lang" or fileType == "txt":
-        lang_process.translatetxt(rawFile, saveFile, targetLang)
+        lang_process.translatetxt(rawFile, saveFile, sourceLang, targetLang)
     elif fileType == "xml":
         xml_process.translate()
     else:
+        run_prompt_text.set("Not Support fule type")
         print("Not Support")
+
+    print("Translate Successful")
+    run_prompt_text.set("Translate Successful")
 
 def threading_control(fun):
     if fun == 1:
@@ -89,18 +99,20 @@ def threading_control(fun):
 
 
 def window_Start():
-    global inputPath, outputName, langOption, langs_dict, fileOption, file_Information, filePreview, progress
+    global inputPath, outputNameEnter, sourceLangOption, targetLangOption, fileTypeOption, file_Information, filePreview, progress, run_prompt_text
     
-    langs_dict = GoogleTranslator().get_supported_languages(as_dict=True)
-    file_type_option = ("txt", "lang", "json", "xml")
+    langs_dict = MY_MEMORY_LANGUAGES_TO_CODES #Supported languages
+
+    all_file_type = ("txt", "lang", "json") #Supported file types
 
     #Create window
     window = tkinter.Tk()
     window.title("GameTranslator")
-    window.geometry("600x600")
+    window.geometry("600x700")
     window.resizable(True, True)
     window.configure(background = "#9E9F9F")
 
+    #Close window message
     def closeWindow():
         if tkinter.messagebox.askokcancel("Leave", "Are you sure to close the window?"):
             window.destroy()
@@ -108,6 +120,7 @@ def window_Start():
     #Set variables
     inputPath = tkinter.StringVar()
     filePreview = tkinter.StringVar()
+    run_prompt_text = tkinter.StringVar()
 
     #Area
     input_Area = tkinter.Frame(window, bg = "#9E9F9F")
@@ -141,25 +154,30 @@ def window_Start():
     selectFile_btn.pack(fill = "both", side = "right", padx = 5, pady = 5, expand = 0)
 
     #outputname
-    outputName = tkinter.Entry(output_Area, bd = 3, relief = tkinter.SUNKEN)
+    outputNameEnter = tkinter.Entry(output_Area, bd = 3, relief = tkinter.SUNKEN)
 
-    outputName.pack(fill = "both", padx = 5 , pady = 5, expand = 1)
+    outputNameEnter.pack(fill = "both", padx = 5 , pady = 5, expand = 1)
 
     #Translate option
-    langOption = ttk.Combobox(set_Area, value = [i for i in langs_dict], state = "readonly")
-    fileOption = ttk.Combobox(set_Area, value = file_type_option, state = "readonly")
+    sourceLangOption = ttk.Combobox(set_Area, value = [i for i in langs_dict], state = "readonly")
+    targetLangOption = ttk.Combobox(set_Area, value = [i for i in langs_dict], state = "readonly")
+    fileTypeOption = ttk.Combobox(set_Area, value = all_file_type, state = "readonly")
 
-    langOption.set("Choose Translate Language")
-    fileOption.set("Choose File Type")
+    sourceLangOption.set("Source Language")
+    targetLangOption.set("Target Language")
+    fileTypeOption.set("File Type")
 
-    langOption.pack(fill = "both", side = "left", padx = 5, pady = 5, expand = 1)
-    fileOption.pack(fill = "both", side = "right", padx = 5, pady = 5, expand = 1)
+    sourceLangOption.pack(fill = "both", side = "left", padx = 5, pady = 5, expand = 1)
+    targetLangOption.pack(fill = "both", side = "left", padx = 5, pady = 5, expand = 1)
+    fileTypeOption.pack(fill = "both", side = "right", padx = 5, pady = 5, expand = 1)
 
     #Start translate
     start_btn = tkinter.Button(window, text = "Start Translate", background = "#7D9BB3", command = partial(threading_control, 1), bd = 3, relief = tkinter.RIDGE)
     progress = ttk.Progressbar(window, orient = "horizontal", length = 600, mode = "determinate")
+    run_prompt = tkinter.Label(window, textvariable = run_prompt_text, background = "#FFFFFF")
 
     start_btn.pack(fill = "x", padx = 10, pady = 10)
+    run_prompt.pack(fill = "x", padx = 10, pady = 10)
     #progress.pack(fill = "x", padx = 10, pady = 10)
 
     window.protocol("WM_DELETE_WINDOW", closeWindow)

@@ -1,4 +1,4 @@
-from deep_translator import GoogleTranslator
+from deep_translator import MyMemoryTranslator
 import time, locale
 
 temp = {}#快取
@@ -43,11 +43,11 @@ def translate(text, tryTimes = 0):
     return result
 
 #翻譯準備
-def translateText(text, targetLang = locale.getlocale()[0]):
+def translateText(text, sourceLang, targetLang = locale.getlocale()[0]):
     global translator
     tokens = tokenize_with_nested_braces(text)
     translated_pieces = []
-    translator = GoogleTranslator(source = 'auto', target = targetLang)#翻譯器
+    translator = MyMemoryTranslator(source = sourceLang, target = targetLang)#翻譯器
     
     for item in tokens:
         if item["type"] == "text":

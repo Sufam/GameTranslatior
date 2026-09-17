@@ -1,9 +1,8 @@
 import time
 import translator
 
-def translatetxt(translateFile, outputfile, targetLang):
+def translatetxt(translateFile, outputfile, sourceLang, targetLang):
     translatedText = []
-    print(outputfile)
 
     with open(translateFile, 'r', encoding='utf-8') as f_in, \
         open(outputfile, 'w', encoding='utf-8') as f_out:
@@ -29,7 +28,7 @@ def translatetxt(translateFile, outputfile, targetLang):
                 
             key, value = text.split("=", 1)
             
-            translated_value = translator.translateText(value, targetLang)
+            translated_value = translator.translateText(value, sourceLang, targetLang)
             
             translatedText.append(f"{key}={translated_value}\n")
 
@@ -38,5 +37,3 @@ def translatetxt(translateFile, outputfile, targetLang):
             f_out.writelines(translatedText)
             translatedText.clear()
             f_out.flush()
-
-    print("Translation successful")
